@@ -1,0 +1,87 @@
+---
+title: "DataCleaning"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{r, message=FALSE}
+library(dplyr)
+library(tidyr)
+
+```
+
+## Data Sources
+
+Read in the data from KNB
+
+```{r}
+catch_original <- read.csv("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.302.1")
+```
+
+## Clean and Reshape Data
+
+* remove unnecessary columns
+* check column types
+* reshape data
+
+ctrl + shft + m for the pipe
+
+```{r}
+
+catch_data <- catch_original %>% 
+  mutate(Chinook = if_else(Chinook == "I", "1", Chinook)) %>% 
+  mutate(Chinook = as.integer(Chinook)) %>% 
+  select(-All, -notesRegCode)
+
+```
+
+To test which rows were causing problems in converting Chinook column to integer
+
+```{r}
+i = which(is.na(as.integer(catch_original$Chinook)))
+catch_original[i,]
+```
+## Reshape data
+
+```{r}
+
+catch_long <- catch_data %>% 
+  pivot_longer(cols = -c(Region, Year), names_to = "Species", values_to = "Catch")
+
+catch_wide <- catch_long %>% 
+  pivot_wider(names_from = Species, values_from = Catch)
+
+```
+
+## Group and Summarize
+
+```{r}
+
+mean_region <- catch_long %>% 
+  group_by(Region) %>% 
+  summarize(catch_mean = mean(Catch), .groups = "drop")
+
+sum_year <- catch_long %>% group_by(Year) %>% 
+  summarize(total_year = sum(Catch), num_obs = n(), .groups = "drop")
+
+```
+
+## Join to Regions Definitions
+
+```{r}
+
+region_defs <- read.csv("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.303.1") %>% 
+    select(code, mgmtArea) %>% 
+    rename(Region = code)
+
+```
+
+```{r}
+catch_joined <- left_join(catch_long, region_defs, by = "Region")
+```
+
