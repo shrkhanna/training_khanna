@@ -87,7 +87,7 @@ catch_joined <- left_join(catch_long, region_defs, by = "Region")
 
 Sam was here
 
-Your presence was recorded ... 
+Your presence was recorded ... testing abort command.
 
 checking if this works ... testing merge conflicts. Creating conflict
 
