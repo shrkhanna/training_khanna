@@ -1,0 +1,36 @@
+---
+title: "PackageBuilding"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Building Packages
+
+Even a personal package that has your favorite functions
+
+## Load Libraries
+
+```{r load-lib}
+library(devtools)
+library(usethis)
+library(roxygen2)
+```
+## Creating the package
+
+All of this only done on command line
+
+```{r}
+setwd('..')
+create_package("mytools")
+
+usethis::use_apache_license()
+
+usethis::use_package("devtools")
+
+devtools::check()
+devtools::install()
+```
+
